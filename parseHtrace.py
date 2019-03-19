@@ -117,3 +117,4 @@ def clean_nodes(data):
     func_info['time'] = time
     func_info['child'] = child
     return func_info
+
