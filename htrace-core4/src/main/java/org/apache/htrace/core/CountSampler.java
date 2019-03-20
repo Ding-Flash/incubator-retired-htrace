@@ -33,7 +33,11 @@ public class CountSampler extends Sampler {
   }
 
   @Override
-  public boolean next() {
+  public boolean next(String description) {
     return (count++ % frequency) == 0;
   }
+  public boolean next() {
+	    return next("");
+	  }
+
 }

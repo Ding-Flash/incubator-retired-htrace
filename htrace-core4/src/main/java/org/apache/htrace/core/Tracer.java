@@ -389,7 +389,7 @@ public class Tracer implements Closeable {
       context.pushScope();
       return nullScope;
     }
-    if (!sample()) {
+    if (!sample(description)) {
       context.pushScope();
       return nullScope;
     }
@@ -415,7 +415,7 @@ public class Tracer implements Closeable {
       context.pushScope();
       return nullScope;
     }
-    if (!sample()) {
+    if (!sample(description)) {
       context.pushScope();
       return nullScope;
     }
@@ -518,10 +518,11 @@ public class Tracer implements Closeable {
    *
    * We will create the span if any configured sampler returns true.
    */
-  private boolean sample() {
+  private boolean sample(String description) {
     Sampler[] samplers = curSamplers;
+
     for (Sampler sampler : samplers) {
-      if (sampler.next()) {
+      if (sampler.next(description)) {
         return true;
       }
     }

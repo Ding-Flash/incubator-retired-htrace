@@ -26,7 +26,10 @@ public final class NeverSampler extends Sampler {
   }
 
   @Override
-  public boolean next() {
+  public boolean next(String description) {
     return false;
   }
+  public boolean next() {
+	    return next("");
+	  }
 }

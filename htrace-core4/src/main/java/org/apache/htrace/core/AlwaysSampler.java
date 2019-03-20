@@ -26,7 +26,10 @@ public final class AlwaysSampler extends Sampler {
   }
 
   @Override
-  public boolean next() {
+  public boolean next(String description) {
     return true;
   }
+  public boolean next() {
+	    return next("");
+	  }
 }

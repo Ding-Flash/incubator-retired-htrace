@@ -127,5 +127,6 @@ public abstract class Sampler {
   public static final Sampler ALWAYS = AlwaysSampler.INSTANCE;
   public static final Sampler NEVER = NeverSampler.INSTANCE;
 
+  public abstract boolean next(String description);
   public abstract boolean next();
 }
