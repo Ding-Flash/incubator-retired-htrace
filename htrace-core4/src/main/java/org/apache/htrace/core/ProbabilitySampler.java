@@ -39,7 +39,11 @@ public class ProbabilitySampler extends Sampler {
   }
 
   @Override
+  public boolean next(String description) {
+    return ThreadLocalRandom.current().nextDouble() < threshold;
+  }
   public boolean next() {
     return ThreadLocalRandom.current().nextDouble() < threshold;
+
   }
 }
