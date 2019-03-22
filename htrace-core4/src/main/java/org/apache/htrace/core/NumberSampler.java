@@ -1,13 +1,14 @@
 package org.apache.htrace.core;
 
-import java.util.Random;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class NumberSampler extends Sampler {
     public static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
-    public static Long MAX = 0L;
-    public static Random random = new Random();
+    public static Long MAX = 100L;
 
     public NumberSampler(HTraceConfiguration conf) {
     }
@@ -23,7 +24,9 @@ public class NumberSampler extends Sampler {
         }
         Long num = curNum.incrementAndGet();
         MAX = Math.max(num, MAX);
-        return (random.nextLong() % MAX > num);
+        boolean res = ThreadLocalRandom.current().nextLong() % MAX > num;
+        LOG.info(description+": "+res);
+        return res;
     }
 
     @Override
