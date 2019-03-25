@@ -36,6 +36,7 @@ class Parse:
             )
             
     def parse_nodes(self):
+        print("collect nodes...")
         for node in tqdm(self.res):
             if len(node['p']):
                 for parent in node['p']:
@@ -43,27 +44,36 @@ class Parse:
                         self.nodes[parent] = {
                             "name": "",
                             "time": None,
-                            'childs': [node['a']]
+                            "begin": None,
+                            "end": None,
+                            "childs": [node['a']]
                         }
                     else:
                         self.nodes[parent]['childs'].append(node['a'])
-                    self.nodes[node['a']] = {
-                        "name": node['d'],
-                        "time": node['e'] - node['b'],
-                        "childs": []
-                    }
+                self.nodes[node['a']] = {
+                    "name": node['d'],
+                    "time": node['e'] - node['b'],
+                    "begin": node['b'],
+                    "end": node['e'],
+                    "childs": []
+                }
             else:
                 self.call.append(node['a'])
                 if node['a'] in self.nodes.keys():
                     self.nodes[node['a']]['name'] = node['d']
                     self.nodes[node['a']]['time'] =  node['e'] - node['b']
+                    self.nodes[node['a']]['begin'] = node['b']
+                    self.nodes[node['a']]['end'] = node['e']
                 else:
                     self.nodes[node['a']] = {
                         "name": node['d'],
                         "time": node['e'] - node['b'],
+                        "begin": node['b'],
+                        "end": node['e'],
                         "childs": []
                     }
-                    
+        print("collect nodes finished") 
+
     def build_tree(self):
         
         if not len(self.call):
