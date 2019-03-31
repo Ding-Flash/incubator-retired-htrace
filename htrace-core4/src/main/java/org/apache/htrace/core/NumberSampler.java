@@ -6,8 +6,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class NumberSampler extends Sampler {
     public static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
-
+    public final double number;
+    public final static String SAMPLER_NUMBER_CONF_KEY = "sampler.number";
     public NumberSampler(HTraceConfiguration conf) {
+        this.number = Double.parseDouble(conf.get(SAMPLER_NUMBER_CONF_KEY));
     }
 
     public boolean update(String description) {
@@ -19,12 +21,9 @@ public class NumberSampler extends Sampler {
                 curNum = newNum;
             }
         }
-        Long num = curNum.get();
-        Double probability = Math.log(Math.log(num) + 1) / Math.log(100);
+        Long num = curNum.incrementAndGet();
+        Double probability = Math.exp(-(number/(num*num)));
         boolean res = ThreadLocalRandom.current().nextDouble() > probability;
-        if(res){
-            curNum.incrementAndGet();
-        }
         return res;
     }
 
