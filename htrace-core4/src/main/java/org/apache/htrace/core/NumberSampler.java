@@ -1,38 +1,39 @@
 package org.apache.htrace.core;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class NumberSampler extends Sampler{
-	static Map<String, Long> numOfEach = new HashMap<String, Long>(); 
-	static long max = 1;
-	Random random = new Random();
-	
-	public NumberSampler(HTraceConfiguration conf) {
-	  }
-	
-	public synchronized boolean update(String description) {
-		long num = 1;
-		if (numOfEach.get(description) != null) {
-			num = numOfEach.get(description) + 1;
-			numOfEach.put(description,num);
-			if (num > max) {
-				max = num;
-			}
-		} else {
-			numOfEach.put(description, num);
-		}
-		return (random.nextLong() % max > num);
-	}
+public class NumberSampler extends Sampler {
+    public static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
+    public final double number;
+    public final static String SAMPLER_NUMBER_CONF_KEY = "sampler.number";
+    public NumberSampler(HTraceConfiguration conf) {
+        this.number = Double.parseDouble(conf.get(SAMPLER_NUMBER_CONF_KEY));
+    }
 
-	@Override
-	public boolean next(String description) {
-		return update(description);
-		
-	}
-	public boolean next() {
-		return true;
+    public boolean update(String description) {
+        AtomicLong curNum = records.get(description);
+        if (curNum == null) {
+            AtomicLong newNum = new AtomicLong(0);
+            curNum = records.putIfAbsent(description, newNum);
+            if (curNum == null) {
+                curNum = newNum;
+            }
+        }
+        Long num = curNum.incrementAndGet();
+        Double probability = Math.exp(-(number/(num*num)));
+        boolean res = ThreadLocalRandom.current().nextDouble() > probability;
+        return res;
+    }
 
-	}
+    @Override
+    public boolean next(String description) {
+        return update(description);
+
+    }
+
+    public boolean next() {
+        return true;
+    }
 }
