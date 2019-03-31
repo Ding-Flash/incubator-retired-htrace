@@ -6,7 +6,7 @@ import java.lang.Thread;
 
 
 public class TestDemoThread extends Thread{
-	Tracer tracer = new MyTracerConfigration().configTracer("NumberSampler_multithread");
+	Tracer tracer = new MyTracerConfigration().configTracer("TBucketSampler");
 	Random random = new Random();
 //	public void Func_0() throws InterruptedException {
 //		try(TraceScope scope = tracer.newScope("TestDemo#Func_0")) {

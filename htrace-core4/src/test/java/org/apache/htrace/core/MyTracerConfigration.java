@@ -13,6 +13,8 @@ public class MyTracerConfigration {
 	        conf(HTraceConfiguration.fromKeyValuePairs(
 	            "sampler.classes", sampler,
 	            "sampler.fraction","0.2",
+				"sampler.bucketSize","500",
+				"sampler.increaseStep","300",
 	            "span.receiver.classes", LocalFileSpanReceiver.class.getName(),
 	            "local.file.span.receiver.path", traceFileName,
 	            "tracer.id", "%{tname}")).
