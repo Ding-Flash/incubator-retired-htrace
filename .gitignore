@@ -8,6 +8,10 @@
 *.orig
 *~
 *.swp
+*.out
+*.csv
+.ipynb_checkpoints/
+__pycache__/
 dependency-reduced-pom.xml
 htrace-htraced/go/build
 htrace-htraced/go/pkg
