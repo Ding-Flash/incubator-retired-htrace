@@ -1,6 +1,19 @@
 import re
 import json
 from tqdm import tqdm
+import pandas as pd
+from collections import defaultdict
+
+
+def produce():
+    return {
+        'name': None,
+        'time': None,
+        'begin': None,
+        'end': None,
+        'childs': []
+    }
+
 
 class Trace:
     
@@ -17,62 +30,42 @@ class Trace:
                 f.close()
                 return
 
+
 class Parse:
     
-    def __init__(self, path):
-        self.trace = Trace(path)
+    def __init__(self, paths):
+        self.traces = [Trace(path) for path in paths]
         self.patt_str = r'\{"a":.*?[(\])|(\})]\}'
         self.patt = re.compile(self.patt_str)
         self.res = []
         self.call = []
-        self.nodes = {}
+        self.nodes = defaultdict(produce)
         self.trees = []
         self.loads()
         
     def loads(self):
-        for line in tqdm(self.trace):
-            self.res.extend(
-                [json.loads(tree) for tree in self.patt.findall(line)]
-            )
-            
+        for trace in tqdm(self.traces):
+            for line in trace:
+                self.res.extend(
+                    [json.loads(tree) for tree in self.patt.findall(line)]
+                )
+
     def parse_nodes(self):
-        print("collect nodes...")
-        for node in tqdm(self.res):
-            if len(node['p']):
-                for parent in node['p']:
-                    if not parent in self.nodes.keys():
-                        self.nodes[parent] = {
-                            "name": "",
-                            "time": None,
-                            "begin": None,
-                            "end": None,
-                            "childs": [node['a']]
-                        }
-                    else:
-                        self.nodes[parent]['childs'].append(node['a'])
-                self.nodes[node['a']] = {
-                    "name": node['d'],
-                    "time": node['e'] - node['b'],
-                    "begin": node['b'],
-                    "end": node['e'],
-                    "childs": []
-                }
-            else:
-                self.call.append(node['a'])
-                if node['a'] in self.nodes.keys():
-                    self.nodes[node['a']]['name'] = node['d']
-                    self.nodes[node['a']]['time'] =  node['e'] - node['b']
-                    self.nodes[node['a']]['begin'] = node['b']
-                    self.nodes[node['a']]['end'] = node['e']
-                else:
-                    self.nodes[node['a']] = {
-                        "name": node['d'],
-                        "time": node['e'] - node['b'],
-                        "begin": node['b'],
-                        "end": node['e'],
-                        "childs": []
-                    }
-        print("collect nodes finished") 
+        for func in self.res:
+            cur = self.nodes[func['a']]
+            if not cur['name']:
+                cur['name'] = func['d']
+                cur['time'] = func['e'] - func['b']
+                cur['begin'] = func['b']
+                cur['end'] = func['e']
+
+            if not len(func['p']):
+                self.call.append(func['a'])
+                continue
+
+            for p_hash in func['p']:
+                parent = self.nodes[p_hash]
+                parent['childs'].append(func['a'])
 
     def build_tree(self):
         
@@ -98,23 +91,36 @@ class Parse:
             })
             deepCall(root, self.trees[-1])
 
+
 def compress(node, desc, deep, layer):
     layer = layer + "&" + str(deep)
-    vis = []
+    # vis = set()
     for index, child in enumerate(node['childs']):
-        if child['name'] in vis:
-            continue
-        vis.append(child['name'])
-        desc['d'] = desc['d'] + '->' + layer + "#" + str(index) + '(' + child['name'] + ')'
+        name = child['name']
+        if '[' in child['name']:
+            name = child['name'][:child['name'].find('[')]
+        if '(' in child['name']:
+            name = child['name'][:child['name'].find('(')]
+        # if name in vis:
+        #     continue
+        # vis.add(name)
+        desc['d'] = desc['d'] + '->' + layer + "#" + str(index) + '(' + name + ')'
         compress(child, desc, deep+1, layer + "#" + str(index))
+
 
 def hash_tree(trees):
     hashtree = []
     for tree in trees:
-        desc = {'d': '0'+'('+tree['name']+')'}
+        name = tree['name']
+        if '[' in tree['name']:
+            name = tree['name'][:tree['name'].find('[')]
+        if '(' in tree['name']:
+            name = tree['name'][:tree['name'].find('(')]
+        desc = {'d': '0'+'('+name+')'}
         compress(tree, desc, 1, '0')
         hashtree.append(desc['d'])
     return hashtree
+
 
 def clean_nodes(data):
     name, time, child = [],[],[]
@@ -128,3 +134,27 @@ def clean_nodes(data):
     func_info['child'] = child
     return func_info
 
+
+def read_trace(file, flag=False):
+
+    pfile = file.split('.')[0]+'.'+'pkl'
+    if flag:
+        n = pd.read_pickle(pfile)
+        return n
+    wordcount = Parse(file)
+    wordcount.parse_nodes()
+    root_nodes = [wordcount.nodes[hash_node] for hash_node in wordcount.call]
+    nodes_info = {
+        'name': [],
+        'time': [],
+        'begin': [],
+        'end': []
+    }
+    for root in root_nodes:
+        nodes_info['name'].append(root['name'])
+        nodes_info['time'].append(root['time'])
+        nodes_info['begin'].append(root['begin'])
+        nodes_info['end'].append(root['end'])
+    n = pd.DataFrame(nodes_info)
+    n.to_pickle(pfile)
+    return n
