@@ -17,3 +17,5 @@ htrace-htraced/go/build
 htrace-htraced/go/pkg
 htrace-htraced/src/go
 htrace-htraced/bin
+MyTracerConfigration.java
+TestDemoThread.java

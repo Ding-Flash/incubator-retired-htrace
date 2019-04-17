@@ -6,7 +6,7 @@ import java.lang.Thread;
 
 
 public class TestDemoThread extends Thread{
-	Tracer tracer = new MyTracerConfigration().configTracer("TBucketSampler");
+	Tracer tracer = new MyTracerConfigration().configTracer("LimitSampler");
 	Random random = new Random();
 //	public void Func_0() throws InterruptedException {
 //		try(TraceScope scope = tracer.newScope("TestDemo#Func_0")) {
@@ -23,7 +23,7 @@ public class TestDemoThread extends Thread{
 //	}
 	public void Func_1() throws InterruptedException {
 		try(TraceScope scope = tracer.newScope("TestDemo#Func_1")) {
-			
+//			Thread.sleep(100);
 			int t = random.nextInt(100);
 			Thread.sleep(t);	
 			if (random.nextDouble() > 0.2) {
@@ -39,7 +39,7 @@ public class TestDemoThread extends Thread{
 	}
 	public void Func_2() throws InterruptedException {
 		try(TraceScope scope = tracer.newScope("TestDemo#Func_2")) {
-			
+//			Thread.sleep(10);
 			int t = random.nextInt(100);
 			Thread.sleep(t);	
 			if (random.nextDouble() > 0.2) {
@@ -56,7 +56,7 @@ public class TestDemoThread extends Thread{
 	public void Func_1_1() throws InterruptedException {
 		try(TraceScope scope = tracer.newScope("TestDemo#Func_1_1")) {
 	
-			int t = random.nextInt(100);
+			int t = random.nextInt(10);
 			Thread.sleep(t);
 		}
 	}

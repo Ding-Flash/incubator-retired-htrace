@@ -6,7 +6,7 @@ public class MyTracerConfigration {
 	
 	
 	public Tracer configTracer(String sampler) {
-		String traceFileName = "F:\\JavaProject\\htrace-4.3.0-incubating\\result\\result_"+sampler+".json";
+		String traceFileName = "/Users/yangs/Desktop/"+sampler+".json";
 		Tracer tracer = new Tracer.Builder().
 	        name("testWriteToLocalFileTracer").
 	        tracerPool(new TracerPool("testWriteToLocalFile")).
@@ -14,6 +14,7 @@ public class MyTracerConfigration {
 	            "sampler.classes", sampler,
 	            "sampler.fraction","0.2",
 				"sampler.bucketSize","50",
+				"sampler.limit","10",
 				"sampler.increaseStep","3",
 	            "span.receiver.classes", LocalFileSpanReceiver.class.getName(),
 	            "local.file.span.receiver.path", traceFileName,
