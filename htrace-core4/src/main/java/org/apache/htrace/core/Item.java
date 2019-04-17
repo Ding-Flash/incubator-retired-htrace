@@ -24,12 +24,10 @@ public class Item {
         Long interval = curTime - preTime;
         if (interval > 50 * preInterval){
             probability = 1.0;
-            LOG.info("SpeedSampler +++++p timestamp: " + curTime + " interval: "+ interval + " p: "+ probability);
         }
         else{
-            if(probability > 0.4) {
-                probability -= 0.05;
-                LOG.info("SpeedSampler -p "+ curTime + " interval: "+ interval + " p: "+ probability);
+            if(probability > 0.01) {
+                probability -= 0.2;
             }
         }
         preInterval = interval;

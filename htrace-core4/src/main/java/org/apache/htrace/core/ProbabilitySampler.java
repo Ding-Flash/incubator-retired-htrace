@@ -44,6 +44,5 @@ public class ProbabilitySampler extends Sampler {
   }
   public boolean next() {
     return ThreadLocalRandom.current().nextDouble() < threshold;
-
   }
 }
