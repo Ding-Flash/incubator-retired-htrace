@@ -54,7 +54,7 @@ public class TBucketSampler extends Sampler {
             f.set(0,f.get(0)+tok>bktSize?bktSize-1:f.get(0)+tok-1);
             f.set(1,f.get(1)+1);
             records.put(description,f);
-//            if(f.get(1)%100 == 0){
+//            if(f.get(1)%100 == 0 && f.get(1)>bktSize){
 //                bktSize = f.get(1)/10;
 //            }
 //            LOG.info("trace \""+description+"\" sampled "+"with token left "+f.get(0)+" and counting "+f.get(1));
@@ -65,7 +65,7 @@ public class TBucketSampler extends Sampler {
             Long tok = newtok(description);
             f.set(0,tok);
             records.put(description,f);
-//            if(f.get(1)%100 == 0){
+//            if(f.get(1)%100 == 0 && f.get(1)>bktSize){
 //                bktSize = f.get(1)/10;
 //            }
 //            LOG.info("trace \""+description+"\" sampled "+"with token left "+f.get(0)+" and counting "+f.get(1));

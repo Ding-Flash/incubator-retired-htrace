@@ -45,6 +45,7 @@ public class LocalFileSpanReceiver extends SpanReceiver {
   private static final Log LOG = LogFactory.getLog(LocalFileSpanReceiver.class);
   public static final String PATH_KEY = "local.file.span.receiver.path";
   public static final String CAPACITY_KEY = "local.file.span.receiver.capacity";
+  public static final String APPEND_KEY = "local.file.span.receiver.append";
   public static final int CAPACITY_DEFAULT = 5000;
   private static ObjectWriter JSON_WRITER = new ObjectMapper().writer();
   private final String path;
@@ -71,7 +72,7 @@ public class LocalFileSpanReceiver extends SpanReceiver {
     }
     boolean success = false;
     try {
-      this.stream = new FileOutputStream(path, true);
+      this.stream = new FileOutputStream(path, conf.getBoolean(APPEND_KEY,true));
     } catch (IOException ioe) {
       LOG.error("Error opening " + path + ": " + ioe.getMessage());
       throw new RuntimeException(ioe);
