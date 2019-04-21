@@ -8,32 +8,32 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class LimitSampler extends Sampler {
 
-    public static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
-    public final static String SAMPLER_Limit_CONF_KEY = "sampler.limit";
-    public final static String SAMPLER_FRACTION_CONF_KEY = "sampler.fraction";
-    public static long limit;
-    public static double threshold;
+    private static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
+    private final static String SAMPLER_LIMIT_CONF_KEY = "sampler.limit";
+    private final static String SAMPLER_FRACTION_CONF_KEY = "sampler.fraction";
+    private final long limit;
+    private final double threshold;
 
     public static Timer t;
 
-    class Task extends TimerTask{
+    class Task extends TimerTask {
         @Override
         public void run() {
-            for(String key: records.keySet()){
+            for (String key : records.keySet()) {
                 AtomicLong newNum = new AtomicLong(0);
                 records.put(key, newNum);
             }
         }
     }
 
-    public LimitSampler(HTraceConfiguration conf){
-        this.limit = Long.parseLong(conf.get(SAMPLER_Limit_CONF_KEY));
+    public LimitSampler(HTraceConfiguration conf) {
+        this.limit = Long.parseLong(conf.get(SAMPLER_LIMIT_CONF_KEY));
         this.threshold = Double.parseDouble(conf.get(SAMPLER_FRACTION_CONF_KEY));
         t = new Timer(true);
-        t.schedule(new Task(),1000,1000);
+        t.schedule(new Task(), 1000, 1000);
     }
 
-    public Double updata(String description){
+    private double updata(String description) {
         AtomicLong curNum = records.get(description);
         if (curNum == null) {
             AtomicLong newNum = new AtomicLong(0);
@@ -42,9 +42,9 @@ public class LimitSampler extends Sampler {
                 curNum = newNum;
             }
         }
-        Long num = curNum.incrementAndGet();
-        if(num > limit){
-            return threshold;
+        long num = curNum.incrementAndGet();
+        if (num > limit) {
+            return this.threshold;
         }
         return 1.0;
     }

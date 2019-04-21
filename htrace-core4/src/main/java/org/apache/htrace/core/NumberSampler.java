@@ -5,13 +5,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class NumberSampler extends Sampler {
-    public static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
+    private static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
     public final double number;
-    public static double threshold;
-    public final static String SAMPLER_FRACTION_CONF_KEY = "sampler.fraction";
-    public final static String SAMPLER_NUMBER_CONF_KEY = "sampler.number";
+    private final double threshold;
+    private final static String SAMPLER_FRACTION_CONF_KEY = "sampler.fraction";
+    private final static String SAMPLER_NUMBER_CONF_KEY = "sampler.number";
+
     public NumberSampler(HTraceConfiguration conf) {
-        this.number = Double.parseDouble(conf.get(SAMPLER_NUMBER_CONF_KEY));
+        this.number = Math.pow(Double.parseDouble(conf.get(SAMPLER_NUMBER_CONF_KEY)), 2);
         this.threshold = Double.parseDouble(conf.get(SAMPLER_FRACTION_CONF_KEY));
     }
 
@@ -25,8 +26,8 @@ public class NumberSampler extends Sampler {
             }
         }
         Long num = curNum.incrementAndGet();
-        Double probability = Math.exp(-(number/(num*num)));
-        if(probability < threshold){
+        double probability = Math.exp(-(number / (num * num)));
+        if (probability < threshold) {
             probability = threshold;
         }
         boolean res = ThreadLocalRandom.current().nextDouble() > probability;

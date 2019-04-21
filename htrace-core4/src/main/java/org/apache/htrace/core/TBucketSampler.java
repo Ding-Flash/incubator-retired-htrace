@@ -23,23 +23,24 @@ public class TBucketSampler extends Sampler {
         incStep = Long.parseLong(conf.get(INCREASE_STEP));
     }
 
-    private static Long newtok(String description){
+    private static Long newtok(String description) {
         Long newTime = System.currentTimeMillis();
         List Func = records.get(description);
-        Long lastTime = (Long)Func.get(2);
-        Long tok = (newTime - lastTime)/incStep;
-        if (tok>0){
-            Func.set(2,newTime);
-            records.put(description,Func);
+        Long lastTime = (Long) Func.get(2);
+        Long tok = (newTime - lastTime) / incStep;
+        if (tok > 0) {
+            Func.set(2, newTime);
+            records.put(description, Func);
         }
 
         return tok;
     }
-    private static synchronized boolean update(String description){
-        if(records.get(description)==null) {
+
+    private static synchronized boolean update(String description) {
+        if (records.get(description) == null) {
             List<Long> TandN = new ArrayList<>();
 //          Data Format:token,number,last timestamp
-            TandN.add(bktSize-1);
+            TandN.add(bktSize - 1);
             TandN.add(1L);
             TandN.add(System.currentTimeMillis());
             records.put(description, TandN);
@@ -49,11 +50,11 @@ public class TBucketSampler extends Sampler {
         }
 
         List<Long> f = records.get(description);
-        if(f.get(0) > 0){
+        if (f.get(0) > 0) {
             Long tok = newtok(description);
-            f.set(0,f.get(0)+tok>bktSize?bktSize-1:f.get(0)+tok-1);
-            f.set(1,f.get(1)+1);
-            records.put(description,f);
+            f.set(0, f.get(0) + tok > bktSize ? bktSize - 1 : f.get(0) + tok - 1);
+            f.set(1, f.get(1) + 1);
+            records.put(description, f);
 //            if(f.get(1)%100 == 0){
 //                bktSize = f.get(1)/10;
 //            }
@@ -61,10 +62,10 @@ public class TBucketSampler extends Sampler {
             return true;
         }
 //        LOG.info("trace \""+description+"\" not sampled "+"with token left "+f.get(0)+" and counting "+f.get(1));
-        if(f.get(0) == 0){
+        if (f.get(0) == 0) {
             Long tok = newtok(description);
-            f.set(0,tok);
-            records.put(description,f);
+            f.set(0, tok);
+            records.put(description, f);
 //            if(f.get(1)%100 == 0){
 //                bktSize = f.get(1)/10;
 //            }
