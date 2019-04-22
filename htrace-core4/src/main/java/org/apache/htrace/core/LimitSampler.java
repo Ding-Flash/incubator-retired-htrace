@@ -11,7 +11,7 @@ public class LimitSampler extends Sampler {
     private static ConcurrentHashMap<String, AtomicLong> records = new ConcurrentHashMap<String, AtomicLong>();
     private final static String SAMPLER_LIMIT_CONF_KEY = "sampler.limit";
     private final static String SAMPLER_FRACTION_CONF_KEY = "sampler.fraction";
-    private final long limit;
+    private final double limit;
     private final double threshold;
 
     public static Timer t;
@@ -27,7 +27,7 @@ public class LimitSampler extends Sampler {
     }
 
     public LimitSampler(HTraceConfiguration conf) {
-        this.limit = Long.parseLong(conf.get(SAMPLER_LIMIT_CONF_KEY));
+        this.limit = Math.pow(Long.parseLong(conf.get(SAMPLER_LIMIT_CONF_KEY)), 2);
         this.threshold = Double.parseDouble(conf.get(SAMPLER_FRACTION_CONF_KEY));
         t = new Timer(true);
         t.schedule(new Task(), 1000, 1000);
@@ -42,11 +42,12 @@ public class LimitSampler extends Sampler {
                 curNum = newNum;
             }
         }
-        long num = curNum.incrementAndGet();
-        if (num > limit) {
-            return this.threshold;
+        Long num = curNum.incrementAndGet();
+        double probability = 1 - Math.exp(-(limit / (num * num)));
+        if (probability < threshold) {
+            probability = threshold;
         }
-        return 1.0;
+        return probability;
     }
 
     @Override
