@@ -26,11 +26,11 @@ public class NumberSampler extends Sampler {
             }
         }
         Long num = curNum.incrementAndGet();
-        double probability = Math.exp(-(number / (num * num)));
+        double probability = 1 - Math.exp(-(number / (num * num)));
         if (probability < threshold) {
             probability = threshold;
         }
-        boolean res = ThreadLocalRandom.current().nextDouble() > probability;
+        boolean res = ThreadLocalRandom.current().nextDouble() < probability;
         return res;
     }
 
